@@ -3,3 +3,9 @@
     name:
       - kubuntu-desktop-minimal
     state: present
+
+- name: install fonts
+  apt:
+    name:
+      - fonts-hack
+    state: present
