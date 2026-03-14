@@ -1,0 +1,64 @@
+# 注意: 以下の環境変数チェックは sudo 経由で実行されるため、
+# 実際のデスクトップセッションの値は反映されない場合があります。
+# あくまで sudo 環境下での値の確認用です。
+- name: check session type
+  shell: echo "${XDG_SESSION_TYPE:-}"
+  register: session_type
+  changed_when: false
+
+- name: show session type
+  debug:
+    msg: "XDG_SESSION_TYPE = {{ session_type.stdout }}"
+
+- name: check IM env GTK
+  shell: echo "${GTK_IM_MODULE:-}"
+  register: gtk_im
+  changed_when: false
+
+- name: check IM env QT
+  shell: echo "${QT_IM_MODULE:-}"
+  register: qt_im
+  changed_when: false
+
+- name: check XMODIFIERS
+  shell: echo "${XMODIFIERS:-}"
+  register: xmod
+  changed_when: false
+
+- name: determine desktop target user
+  set_fact:
+    input_check_target_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id, true) }}"
+
+- name: lookup desktop target user account
+  getent:
+    database: passwd
+    key: "{{ input_check_target_user }}"
+
+- name: set desktop target user home
+  set_fact:
+    input_check_target_home: "{{ getent_passwd[input_check_target_user][4] }}"
+
+- name: show IM envs
+  debug:
+    msg:
+      - "GTK_IM_MODULE={{ gtk_im.stdout }}"
+      - "QT_IM_MODULE={{ qt_im.stdout }}"
+      - "XMODIFIERS={{ xmod.stdout }}"
+
+- name: check mozc packages
+  shell: dpkg -l | grep mozc || true
+  register: mozc_pkgs
+  changed_when: false
+
+- name: show mozc packages
+  debug:
+    msg: "{{ mozc_pkgs.stdout_lines }}"
+
+- name: check mozc active_on_launch setting
+  shell: grep -E '^active_on_launch:' "{{ input_check_target_home }}/.config/mozc/ibus_config.textproto" || true
+  register: mozc_active_on_launch
+  changed_when: false
+
+- name: show mozc active_on_launch setting
+  debug:
+    msg: "{{ mozc_active_on_launch.stdout | default('active_on_launch is not configured') }}"

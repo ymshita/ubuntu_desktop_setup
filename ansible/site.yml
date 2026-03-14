@@ -1,0 +1,9 @@
+- name: Ubuntu desktop setup (local)
+  hosts: local
+  roles:
+    - base
+    - desktop_kde
+    - third_party_apps
+    - devtools
+    - japanese_input
+    - input_check

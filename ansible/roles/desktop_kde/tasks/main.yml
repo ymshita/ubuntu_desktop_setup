@@ -1,0 +1,5 @@
+- name: install KDE Plasma (minimal)
+  apt:
+    name:
+      - kubuntu-desktop-minimal
+    state: present

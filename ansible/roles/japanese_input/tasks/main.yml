@@ -1,0 +1,37 @@
+- name: install japanese input packages
+  apt:
+    name:
+      - ibus-mozc
+      - mozc-server
+    state: present
+
+- name: determine desktop target user
+  set_fact:
+    japanese_input_target_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id, true) }}"
+
+- name: lookup desktop target user account
+  getent:
+    database: passwd
+    key: "{{ japanese_input_target_user }}"
+
+- name: set desktop target user home
+  set_fact:
+    japanese_input_target_home: "{{ getent_passwd[japanese_input_target_user][4] }}"
+
+- name: ensure mozc config directory exists
+  file:
+    path: "{{ japanese_input_target_home }}/.config/mozc"
+    state: directory
+    owner: "{{ japanese_input_target_user }}"
+    group: "{{ japanese_input_target_user }}"
+    mode: "0755"
+
+- name: enable mozc on ibus launch
+  lineinfile:
+    path: "{{ japanese_input_target_home }}/.config/mozc/ibus_config.textproto"
+    regexp: '^active_on_launch:\s*'
+    line: "active_on_launch: True"
+    create: true
+    owner: "{{ japanese_input_target_user }}"
+    group: "{{ japanese_input_target_user }}"
+    mode: "0644"

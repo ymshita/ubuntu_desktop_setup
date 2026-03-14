@@ -1,0 +1,143 @@
+- name: install third-party app prerequisites
+  apt:
+    name:
+      - gpg
+      - wget
+    state: present
+    update_cache: yes
+
+- name: detect Debian architecture
+  command: dpkg --print-architecture
+  register: third_party_apps_dpkg_arch
+  changed_when: false
+
+- name: validate TablePlus support on this Ubuntu version
+  assert:
+    that:
+      - ansible_distribution == "Ubuntu"
+      - ansible_distribution_major_version in ["22", "24"]
+    fail_msg: "TablePlus role is supported only on Ubuntu 22.04 / 24.04."
+  when: third_party_apps_enable_tableplus
+
+- name: set TablePlus repository path suffix
+  set_fact:
+    third_party_apps_tableplus_repo_suffix: "{{ '24' if ansible_distribution_major_version == '24' else '22' }}{{ '-arm' if third_party_apps_dpkg_arch.stdout == 'arm64' else '' }}"
+  when: third_party_apps_enable_tableplus
+
+- name: install Google Linux signing key
+  get_url:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    dest: /tmp/google-linux-signing-key.pub
+    mode: "0644"
+  when: third_party_apps_enable_chrome
+
+- name: dearmor Google Linux signing key
+  shell: gpg --dearmor --yes --output {{ third_party_apps_chrome_keyring_path }} /tmp/google-linux-signing-key.pub
+  args:
+    creates: "{{ third_party_apps_chrome_keyring_path }}"
+  when: third_party_apps_enable_chrome
+
+- name: add Google Chrome repository
+  apt_repository:
+    repo: "deb [arch={{ third_party_apps_dpkg_arch.stdout }} signed-by={{ third_party_apps_chrome_keyring_path }}] https://dl.google.com/linux/chrome/deb/ stable main"
+    filename: google-chrome
+    state: present
+    update_cache: yes
+  when: third_party_apps_enable_chrome
+
+- name: install TablePlus signing key
+  get_url:
+    url: https://deb.tableplus.com/apt.tableplus.com.gpg.key
+    dest: /tmp/tableplus-signing-key.pub
+    mode: "0644"
+  when: third_party_apps_enable_tableplus
+
+- name: dearmor TablePlus signing key
+  shell: gpg --dearmor --yes --output {{ third_party_apps_tableplus_keyring_path }} /tmp/tableplus-signing-key.pub
+  args:
+    creates: "{{ third_party_apps_tableplus_keyring_path }}"
+  when: third_party_apps_enable_tableplus
+
+- name: add TablePlus repository
+  apt_repository:
+    repo: "deb [arch={{ third_party_apps_dpkg_arch.stdout }} signed-by={{ third_party_apps_tableplus_keyring_path }}] https://deb.tableplus.com/debian/{{ third_party_apps_tableplus_repo_suffix }} tableplus main"
+    filename: tableplus
+    state: present
+    update_cache: yes
+  when: third_party_apps_enable_tableplus
+
+- name: install Microsoft signing key
+  get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    dest: /tmp/microsoft.asc
+    mode: "0644"
+  when: third_party_apps_enable_vscode
+
+- name: dearmor Microsoft signing key
+  shell: gpg --dearmor --yes --output {{ third_party_apps_vscode_keyring_path }} /tmp/microsoft.asc
+  args:
+    creates: "{{ third_party_apps_vscode_keyring_path }}"
+  when: third_party_apps_enable_vscode
+
+- name: add VS Code repository
+  apt_repository:
+    repo: "deb [arch={{ third_party_apps_dpkg_arch.stdout }} signed-by={{ third_party_apps_vscode_keyring_path }}] https://packages.microsoft.com/repos/code stable main"
+    filename: vscode
+    state: present
+    update_cache: yes
+  when: third_party_apps_enable_vscode
+
+- name: install repository-managed third-party apps
+  apt:
+    name: "{{ third_party_apps_repo_packages }}"
+    state: present
+  vars:
+    third_party_apps_repo_packages: "{{ (['google-chrome-stable'] if third_party_apps_enable_chrome else []) + (['tableplus'] if third_party_apps_enable_tableplus else []) + (['code'] if third_party_apps_enable_vscode else []) }}"
+  when: third_party_apps_enable_chrome or third_party_apps_enable_tableplus or third_party_apps_enable_vscode
+
+- name: download Discord deb package
+  get_url:
+    url: "{{ third_party_apps_discord_deb_url }}"
+    dest: /tmp/discord.deb
+    mode: "0644"
+  when: third_party_apps_enable_discord
+
+- name: install Discord
+  apt:
+    deb: /tmp/discord.deb
+    state: present
+  when: third_party_apps_enable_discord
+
+- name: download Obsidian deb package
+  get_url:
+    url: "{{ third_party_apps_obsidian_deb_url }}"
+    dest: /tmp/obsidian.deb
+    mode: "0644"
+  when: third_party_apps_enable_obsidian
+
+- name: install Obsidian
+  apt:
+    deb: /tmp/obsidian.deb
+    state: present
+  when: third_party_apps_enable_obsidian
+
+- name: remove signing key temp files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/google-linux-signing-key.pub
+    - /tmp/tableplus-signing-key.pub
+    - /tmp/microsoft.asc
+
+- name: remove deb package temp files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop:
+    - { path: /tmp/discord.deb, when: "{{ third_party_apps_enable_discord }}" }
+    - {
+        path: /tmp/obsidian.deb,
+        when: "{{ third_party_apps_enable_obsidian }}",
+      }
+  when: item.when | bool

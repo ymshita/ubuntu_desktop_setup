@@ -1,0 +1,18 @@
+third_party_apps_enable_chrome: true
+third_party_apps_enable_discord: true
+third_party_apps_enable_obsidian: true
+third_party_apps_enable_tableplus: true
+third_party_apps_enable_vscode: true
+
+third_party_apps_chrome_keyring_path: /usr/share/keyrings/google-linux.gpg
+third_party_apps_tableplus_keyring_path: /usr/share/keyrings/tableplus-archive.gpg
+third_party_apps_vscode_keyring_path: /usr/share/keyrings/microsoft.gpg
+
+# バージョンは必要に応じて更新すること
+# Discord: https://discord.com/download で最新版を確認
+third_party_apps_discord_version: "0.0.71"
+third_party_apps_discord_deb_url: "https://dl.discordapp.net/apps/linux/{{ third_party_apps_discord_version }}/discord-{{ third_party_apps_discord_version }}.deb"
+
+# Obsidian: https://github.com/obsidianmd/obsidian-releases/releases で最新版を確認
+third_party_apps_obsidian_version: "1.7.7"
+third_party_apps_obsidian_deb_url: "https://github.com/obsidianmd/obsidian-releases/releases/download/v{{ third_party_apps_obsidian_version }}/obsidian_{{ third_party_apps_obsidian_version }}_{{ third_party_apps_dpkg_arch.stdout }}.deb"
