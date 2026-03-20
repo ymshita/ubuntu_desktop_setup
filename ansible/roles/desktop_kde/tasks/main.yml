@@ -1,7 +1,7 @@
 - name: install KDE Plasma (minimal)
   apt:
     name:
-      - kubuntu-desktop-minimal
+      - kde-plasma-desktop
     state: present
 
 - name: install fonts

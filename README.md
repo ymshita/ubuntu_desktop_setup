@@ -33,7 +33,12 @@ ansible/
 - `sudo` 可能なユーザーで実行する
 
 ```bash
-ansible-playbook ansible/site.yml
+# ansible installation
+chmod +x install_ansible.sh
+sudo bash install_ansible.sh
+
+# run playbook
+sudo ansible-playbook ansible/site.yml
 ```
 
 `ansible.cfg` で `ansible/inventory.ini` と `ansible/roles` を参照する設定にしています。
