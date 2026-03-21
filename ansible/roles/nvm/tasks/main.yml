@@ -53,3 +53,57 @@
     HOME: "{{ nvm_target_home }}"
     NVM_DIR: "{{ nvm_target_home }}/.nvm"
   when: nvm_node_check.rc != 0
+
+- name: update npm to latest
+  shell: |
+    . {{ nvm_target_home }}/.nvm/nvm.sh
+    current_version="$(nvm exec {{ nvm_node_version }} npm --version)"
+    latest_version="$(nvm exec {{ nvm_node_version }} npm view npm version)"
+    if [ "$current_version" != "$latest_version" ]; then
+      nvm exec {{ nvm_node_version }} npm install -g npm@latest
+      echo "updated"
+    fi
+  register: nvm_npm_update
+  changed_when: "'updated' in nvm_npm_update.stdout"
+  become: true
+  become_user: "{{ nvm_target_user }}"
+  environment:
+    HOME: "{{ nvm_target_home }}"
+    NVM_DIR: "{{ nvm_target_home }}/.nvm"
+  when: nvm_update_npm
+
+- name: install Claude Code CLI
+  shell: |
+    . {{ nvm_target_home }}/.nvm/nvm.sh
+    current_version="$(nvm exec {{ nvm_node_version }} npm list -g @anthropic-ai/claude-code --depth=0 --json | node -e "let s=''; process.stdin.on('data', d => s += d).on('end', () => { const pkg = ((JSON.parse(s).dependencies || {})['@anthropic-ai/claude-code'] || {}); if (pkg.version) process.stdout.write(pkg.version); });")"
+    latest_version="$(nvm exec {{ nvm_node_version }} npm view @anthropic-ai/claude-code version)"
+    if [ "$current_version" != "$latest_version" ]; then
+      nvm exec {{ nvm_node_version }} npm install -g @anthropic-ai/claude-code
+      echo "updated"
+    fi
+  register: nvm_claude_install
+  changed_when: "'updated' in nvm_claude_install.stdout"
+  become: true
+  become_user: "{{ nvm_target_user }}"
+  environment:
+    HOME: "{{ nvm_target_home }}"
+    NVM_DIR: "{{ nvm_target_home }}/.nvm"
+  when: nvm_enable_claude
+
+- name: install OpenAI Codex CLI
+  shell: |
+    . {{ nvm_target_home }}/.nvm/nvm.sh
+    current_version="$(nvm exec {{ nvm_node_version }} npm list -g @openai/codex --depth=0 --json | node -e "let s=''; process.stdin.on('data', d => s += d).on('end', () => { const pkg = ((JSON.parse(s).dependencies || {})['@openai/codex'] || {}); if (pkg.version) process.stdout.write(pkg.version); });")"
+    latest_version="$(nvm exec {{ nvm_node_version }} npm view @openai/codex version)"
+    if [ "$current_version" != "$latest_version" ]; then
+      nvm exec {{ nvm_node_version }} npm install -g @openai/codex
+      echo "updated"
+    fi
+  register: nvm_codex_install
+  changed_when: "'updated' in nvm_codex_install.stdout"
+  become: true
+  become_user: "{{ nvm_target_user }}"
+  environment:
+    HOME: "{{ nvm_target_home }}"
+    NVM_DIR: "{{ nvm_target_home }}/.nvm"
+  when: nvm_enable_codex

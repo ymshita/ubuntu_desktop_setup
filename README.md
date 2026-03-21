@@ -97,15 +97,6 @@ sudo ansible-playbook ansible/site.yml
   - IME の起動時状態
   - これらは KDE の設定ファイルや `kwriteconfig5`/`kwriteconfig6` などの扱い確認が必要
 
-## 次に Ansible 化すべき項目
-
-優先度順ならこのあたりです。
-
-1. `base` role で mozc の実在確認方針を整理する
-2. `devtools` role で Docker を確実に入れる
-3. `nvm` と Node.js 22 の導入手順を role 化する
-4. KDE 固有設定を「パッケージ導入」と「個人設定」に分離して管理する
-
 ## 外部アプリの導入方針
 
 `third_party_apps` role で管理します。
@@ -123,11 +114,3 @@ sudo ansible-playbook ansible/site.yml
 - `mozc` 自体は Ubuntu 日本語環境に含まれている可能性があるため、まずは確認を優先します
 - 起動時に直接入力ではなくひらがな入力にしたい場合は、`~/.config/mozc/ibus_config.textproto` の `active_on_launch: True` を構成管理します
 - これは IBus + Mozc 構成を前提にしています
-
-## 注意
-
-- Chrome / Discord / Obsidian / TablePlus / VS Code は role 化済みです
-- `mozc` の導入自体は未実装で、現状は確認と設定反映を優先しています
-- `nvm` / `codex` / `newsql` は未実装です
-- KDE の詳細設定は未実装です
-- 手動手順をそのまま全部自動化するより、まずは再現性が高い項目から Ansible 化する方が低コストです

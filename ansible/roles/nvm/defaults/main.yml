@@ -3,3 +3,12 @@ nvm_version: "0.40.1"
 
 # インストールする Node.js のメジャーバージョン
 nvm_node_version: "22"
+
+# npm を最新バージョンに更新するか
+nvm_update_npm: true
+
+# Claude Code CLI (@anthropic-ai/claude-code) をインストールするか
+nvm_enable_claude: true
+
+# OpenAI Codex CLI (@openai/codex) をインストールするか
+nvm_enable_codex: true
