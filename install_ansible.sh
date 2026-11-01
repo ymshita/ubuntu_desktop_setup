@@ -38,6 +38,8 @@ echo_info "software-properties-common をインストール中..."
 apt-get install -y software-properties-common
 
 # 3. Ansible 公式 PPA の追加
+# リリースアップグレードで無効化された旧リリース向け PPA 定義を削除
+find /etc/apt/sources.list.d -name 'ansible-ubuntu-ansible-*.sources' ! -name "*-$(. /etc/os-release && echo "$VERSION_CODENAME").sources" -delete
 echo_info "Ansible 公式 PPA を追加中..."
 add-apt-repository --yes --update ppa:ansible/ansible
 

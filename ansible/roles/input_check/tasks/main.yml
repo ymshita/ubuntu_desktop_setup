@@ -27,7 +27,7 @@
 
 - name: determine desktop target user
   set_fact:
-    input_check_target_user: "{{ ansible_env.SUDO_USER | default(ansible_user_id, true) }}"
+    input_check_target_user: "{{ ansible_facts.env.SUDO_USER | default(ansible_facts.user_id, true) }}"
 
 - name: lookup desktop target user account
   getent:
@@ -36,7 +36,7 @@
 
 - name: set desktop target user home
   set_fact:
-    input_check_target_home: "{{ getent_passwd[input_check_target_user][4] }}"
+    input_check_target_home: "{{ ansible_facts.getent_passwd[input_check_target_user][4] }}"
 
 - name: show IM envs
   debug:
@@ -45,20 +45,20 @@
       - "QT_IM_MODULE={{ qt_im.stdout }}"
       - "XMODIFIERS={{ xmod.stdout }}"
 
-- name: check mozc packages
-  shell: dpkg -l | grep mozc || true
-  register: mozc_pkgs
+- name: check fcitx5 packages
+  shell: dpkg -l | grep -E 'fcitx5|mozc' || true
+  register: fcitx5_pkgs
   changed_when: false
 
-- name: show mozc packages
+- name: show fcitx5 packages
   debug:
-    msg: "{{ mozc_pkgs.stdout_lines }}"
+    msg: "{{ fcitx5_pkgs.stdout_lines }}"
 
-- name: check mozc active_on_launch setting
-  shell: grep -E '^active_on_launch:' "{{ input_check_target_home }}/.config/mozc/ibus_config.textproto" || true
-  register: mozc_active_on_launch
+- name: check KWin InputMethod setting
+  shell: grep -E '^InputMethod=' "{{ input_check_target_home }}/.config/kwinrc" || true
+  register: kwin_input_method
   changed_when: false
 
-- name: show mozc active_on_launch setting
+- name: show KWin InputMethod setting
   debug:
-    msg: "{{ mozc_active_on_launch.stdout | default('active_on_launch is not configured') }}"
+    msg: "{{ kwin_input_method.stdout | default('InputMethod is not configured', true) }}"

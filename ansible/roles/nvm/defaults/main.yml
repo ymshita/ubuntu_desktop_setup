@@ -1,8 +1,8 @@
 # nvm: https://github.com/nvm-sh/nvm/releases で最新版を確認
-nvm_version: "0.40.1"
+nvm_version: "0.40.8"
 
 # インストールする Node.js のメジャーバージョン
-nvm_node_version: "22"
+nvm_node_version: "24"
 
 # npm を最新バージョンに更新するか
 nvm_update_npm: true

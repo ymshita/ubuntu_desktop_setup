@@ -1,7 +1,7 @@
 # ubuntu_desktop_setup
 
 Ubuntu Desktop を Ansible で構成管理するためのリポジトリです。  
-現在の主対象は **KDE Plasma ベースの Ubuntu デスクトップ初期構築** です。
+現在の主対象は **KDE Plasma (Wayland) ベースの Ubuntu 26.04 LTS デスクトップ初期構築** です。
 
 ## 方針
 
@@ -21,6 +21,7 @@ ansible/
     ├── devtools
     ├── input_check
     ├── japanese_input
+    ├── nvm
     └── third_party_apps
 ```
 
@@ -54,7 +55,8 @@ sudo ansible-playbook ansible/site.yml
 | `desktop_kde` | KDEデスクトップ環境のセットアップ |
 | `third_party_apps` | Discord・Obsidianなどサードパーティ製アプリの導入 |
 | `devtools` | 開発ツール（git・dockerなど）の導入 |
-| `japanese_input` | 日本語入力（Fcitx・Mozcなど）の設定 |
+| `nvm` | nvm・Node.js・Claude Code / Codex CLI の導入 |
+| `japanese_input` | 日本語入力（fcitx5-mozc）の設定 |
 | `input_check` | 設定確認・動作チェック |
 ```
 
@@ -76,8 +78,8 @@ sudo ansible-playbook ansible/site.yml
   - `newsql`
   - TablePlus
 - 日本語入力
-  - mozc
-  - Japanese Input の初期設定
+  - fcitx5-mozc（KWin の仮想キーボードとして起動）
+  - 反映には再ログインが必要
 - セキュリティアップデート
   - `unattended-upgrades`
 
