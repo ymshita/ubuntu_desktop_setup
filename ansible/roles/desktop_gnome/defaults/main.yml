@@ -1,0 +1,23 @@
+# value は gsettings get の出力と同じ表記にする (冪等性の判定に使う)
+desktop_gnome_settings:
+  - schema: org.gnome.shell
+    key: disabled-extensions
+    value: "['tiling-assistant@ubuntu.com']"
+  - schema: org.gnome.mutter
+    key: overlay-key
+    value: "''"
+  - schema: org.gnome.mutter
+    key: edge-tiling
+    value: "false"
+  - schema: org.gnome.mutter.keybindings
+    key: toggle-tiled-left
+    value: "@as []"
+  - schema: org.gnome.mutter.keybindings
+    key: toggle-tiled-right
+    value: "@as []"
+  - schema: org.gnome.desktop.wm.keybindings
+    key: switch-to-workspace-left
+    value: "['<Super>Left', '<Super>Page_Up', '<Super>KP_Prior', '<Super><Alt>Left', '<Control><Alt>Left']"
+  - schema: org.gnome.desktop.wm.keybindings
+    key: switch-to-workspace-right
+    value: "['<Super>Right', '<Super>Page_Down', '<Super>KP_Next', '<Super><Alt>Right', '<Control><Alt>Right']"

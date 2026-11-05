@@ -25,19 +25,6 @@
   register: xmod
   changed_when: false
 
-- name: determine desktop target user
-  set_fact:
-    input_check_target_user: "{{ ansible_facts.env.SUDO_USER | default(ansible_facts.user_id, true) }}"
-
-- name: lookup desktop target user account
-  getent:
-    database: passwd
-    key: "{{ input_check_target_user }}"
-
-- name: set desktop target user home
-  set_fact:
-    input_check_target_home: "{{ ansible_facts.getent_passwd[input_check_target_user][4] }}"
-
 - name: show IM envs
   debug:
     msg:
@@ -45,20 +32,11 @@
       - "QT_IM_MODULE={{ qt_im.stdout }}"
       - "XMODIFIERS={{ xmod.stdout }}"
 
-- name: check fcitx5 packages
-  shell: dpkg -l | grep -E 'fcitx5|mozc' || true
-  register: fcitx5_pkgs
+- name: check ibus packages
+  shell: dpkg -l | grep -E 'ibus|mozc' || true
+  register: ibus_pkgs
   changed_when: false
 
-- name: show fcitx5 packages
+- name: show ibus packages
   debug:
-    msg: "{{ fcitx5_pkgs.stdout_lines }}"
-
-- name: check KWin InputMethod setting
-  shell: grep -E '^InputMethod=' "{{ input_check_target_home }}/.config/kwinrc" || true
-  register: kwin_input_method
-  changed_when: false
-
-- name: show KWin InputMethod setting
-  debug:
-    msg: "{{ kwin_input_method.stdout | default('InputMethod is not configured', true) }}"
+    msg: "{{ ibus_pkgs.stdout_lines }}"

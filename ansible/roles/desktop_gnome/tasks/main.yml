@@ -1,0 +1,68 @@
+- name: install GNOME desktop
+  apt:
+    name:
+      - ubuntu-desktop-minimal
+      - gdm3
+    state: present
+
+- name: install fonts
+  apt:
+    name:
+      - fonts-hack
+    state: present
+
+- name: select gdm3 in debconf
+  debconf:
+    name: gdm3
+    question: shared/default-x-display-manager
+    value: gdm3
+    vtype: select
+
+- name: set gdm3 as default display manager
+  copy:
+    dest: /etc/X11/default-display-manager
+    content: "/usr/sbin/gdm3\n"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: point display-manager service to gdm3
+  file:
+    src: /lib/systemd/system/gdm3.service
+    dest: /etc/systemd/system/display-manager.service
+    state: link
+    force: true
+
+- name: determine desktop target user
+  set_fact:
+    desktop_gnome_target_user: "{{ ansible_facts.env.SUDO_USER | default(ansible_facts.user_id, true) }}"
+
+# Super 単押しの Activities を無効化し、Super+←/→ をワークスペース移動に割り当てる。
+# Super+←/→ のタイリングと画面端へのドラッグは Tiling Assistant が担当しているため無効化する。
+# 拡張の無効化で mutter の設定が既定に戻るので、拡張を先に処理する。
+# Super+Space の入力切替は GNOME の既定で有効。
+- name: check gnome settings
+  command: dbus-run-session -- gsettings get {{ item.schema }} {{ item.key }}
+  become: true
+  become_user: "{{ desktop_gnome_target_user }}"
+  loop: "{{ desktop_gnome_settings }}"
+  register: desktop_gnome_current
+  changed_when: false
+  check_mode: false
+
+- name: apply gnome settings
+  command:
+    argv:
+      - dbus-run-session
+      - --
+      - gsettings
+      - set
+      - "{{ item.item.schema }}"
+      - "{{ item.item.key }}"
+      - "{{ item.item.value }}"
+  become: true
+  become_user: "{{ desktop_gnome_target_user }}"
+  loop: "{{ desktop_gnome_current.results }}"
+  loop_control:
+    label: "{{ item.item.schema }} {{ item.item.key }}"
+  when: item.stdout != item.item.value

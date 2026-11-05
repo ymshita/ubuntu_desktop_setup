@@ -1,7 +1,7 @@
 # ubuntu_desktop_setup
 
 Ubuntu Desktop を Ansible で構成管理するためのリポジトリです。  
-現在の主対象は **KDE Plasma (Wayland) ベースの Ubuntu 26.04 LTS デスクトップ初期構築** です。
+現在の主対象は **GNOME (Wayland) ベースの Ubuntu 26.04 LTS デスクトップ初期構築** です。
 
 ## 方針
 
@@ -17,7 +17,7 @@ ansible/
 ├── site.yml
 └── roles/
     ├── base
-    ├── desktop_kde
+    ├── desktop_gnome
     ├── devtools
     ├── input_check
     ├── japanese_input
@@ -46,17 +46,17 @@ sudo ansible-playbook ansible/site.yml
 
 ## このリポジトリで管理したい内容
 
-手動セットアップで実施していた内容を、KDE 向けに置き換えながら管理する想定です。
+手動セットアップで実施していた内容を管理する想定です。
 
 ```md
 | ロール | 推測される役割 |
 |---|---|
 | `base` | 基本パッケージ・共通設定 |
-| `desktop_kde` | KDEデスクトップ環境のセットアップ |
+| `desktop_gnome` | GNOMEデスクトップ環境のセットアップ |
 | `third_party_apps` | Discord・Obsidianなどサードパーティ製アプリの導入 |
 | `devtools` | 開発ツール（git・dockerなど）の導入 |
 | `nvm` | nvm・Node.js・Claude Code / Codex CLI の導入 |
-| `japanese_input` | 日本語入力（fcitx5-mozc）の設定 |
+| `japanese_input` | 日本語入力（ibus-mozc）の設定 |
 | `input_check` | 設定確認・動作チェック |
 ```
 
@@ -66,7 +66,9 @@ sudo ansible-playbook ansible/site.yml
   - `gnupg`
   - `unattended-upgrades`
 - デスクトップ環境
-  - KDE Plasma
+  - GNOME
+  - Super 単押しの Activities は無効化
+  - Super+←/→ はワークスペース移動（Tiling Assistant は無効化）
 - 開発ツール・日常利用ツール
   - Docker
   - Chrome
@@ -78,26 +80,10 @@ sudo ansible-playbook ansible/site.yml
   - `newsql`
   - TablePlus
 - 日本語入力
-  - fcitx5-mozc（KWin の仮想キーボードとして起動）
-  - 反映には再ログインが必要
+  - ibus-mozc
+  - Super+Space で入力ソースを切り替える（GNOME の既定）
 - セキュリティアップデート
   - `unattended-upgrades`
-
-## KDE 化は可能か
-
-可能です。  
-少なくともこのリポジトリの目的である「Ubuntu デスクトップの構成管理」という範囲では、XFCE から KDE への置き換えは自然です。
-
-ただし、次の点は分けて考える必要があります。
-
-- パッケージ導入
-  - KDE 本体や mozc などは Ansible 化しやすい
-- デスクトップ固有設定
-  - 端末アプリ既定化
-  - ワークスペースのショートカット
-  - 電源管理
-  - IME の起動時状態
-  - これらは KDE の設定ファイルや `kwriteconfig5`/`kwriteconfig6` などの扱い確認が必要
 
 ## 外部アプリの導入方針
 
@@ -113,6 +99,4 @@ sudo ansible-playbook ansible/site.yml
 
 ## 日本語入力の方針
 
-- `mozc` 自体は Ubuntu 日本語環境に含まれている可能性があるため、まずは確認を優先します
 - 起動時に直接入力ではなくひらがな入力にしたい場合は、`~/.config/mozc/ibus_config.textproto` の `active_on_launch: True` を構成管理します
-- これは IBus + Mozc 構成を前提にしています

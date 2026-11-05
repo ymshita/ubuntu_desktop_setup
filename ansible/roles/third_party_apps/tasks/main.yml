@@ -73,12 +73,17 @@
     update_cache: yes
   when: third_party_apps_enable_tableplus
 
+# アプリ側の更新で固定バージョンより新しくなると apt の deb 指定が失敗するため、未導入時のみ入れる
 - name: install Discord
   apt:
     deb: "{{ third_party_apps_discord_deb_url }}"
-  when: third_party_apps_enable_discord
+  when:
+    - third_party_apps_enable_discord
+    - "'discord' not in ansible_facts.packages"
 
 - name: install Obsidian
   apt:
     deb: "{{ third_party_apps_obsidian_deb_url }}"
-  when: third_party_apps_enable_obsidian
+  when:
+    - third_party_apps_enable_obsidian
+    - "'obsidian' not in ansible_facts.packages"

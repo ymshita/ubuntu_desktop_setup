@@ -1,6 +1,11 @@
-# KDE Plasma (Wayland) では fcitx5 を KWin の仮想キーボードとして起動する構成が推奨。
-# GTK_IM_MODULE / QT_IM_MODULE は Wayland ネイティブアプリの入力を阻害するため設定しない。
+# GNOME 標準の IBus + Mozc を使う。入力ソースの切替は Super+Space (GNOME の既定)
 - name: install japanese input packages
+  apt:
+    name:
+      - ibus-mozc
+    state: present
+
+- name: remove fcitx5
   apt:
     name:
       - fcitx5
@@ -9,66 +14,4 @@
       - fcitx5-frontend-gtk4
       - fcitx5-frontend-qt6
       - kde-config-fcitx5
-    state: present
-
-- name: remove ibus mozc
-  apt:
-    name: ibus-mozc
     state: absent
-
-- name: determine desktop target user
-  set_fact:
-    japanese_input_target_user: "{{ ansible_facts.env.SUDO_USER | default(ansible_facts.user_id, true) }}"
-
-- name: lookup desktop target user account
-  getent:
-    database: passwd
-    key: "{{ japanese_input_target_user }}"
-
-- name: set desktop target user home
-  set_fact:
-    japanese_input_target_home: "{{ ansible_facts.getent_passwd[japanese_input_target_user][4] }}"
-
-- name: set fcitx5 as KWin virtual keyboard
-  community.general.ini_file:
-    path: "{{ japanese_input_target_home }}/.config/kwinrc"
-    section: Wayland
-    option: InputMethod
-    value: /usr/share/applications/org.fcitx.Fcitx5.desktop
-    no_extra_spaces: true
-    owner: "{{ japanese_input_target_user }}"
-    group: "{{ japanese_input_target_user }}"
-    mode: "0600"
-
-- name: ensure fcitx5 config directory exists
-  file:
-    path: "{{ japanese_input_target_home }}/.config/fcitx5"
-    state: directory
-    owner: "{{ japanese_input_target_user }}"
-    group: "{{ japanese_input_target_user }}"
-    mode: "0755"
-
-# 初回のみ作成。以降は fcitx5 設定 GUI での変更を優先する
-- name: create fcitx5 profile with mozc
-  copy:
-    dest: "{{ japanese_input_target_home }}/.config/fcitx5/profile"
-    force: false
-    owner: "{{ japanese_input_target_user }}"
-    group: "{{ japanese_input_target_user }}"
-    mode: "0644"
-    content: |
-      [Groups/0]
-      Name=Default
-      Default Layout={{ japanese_input_keyboard_layout }}
-      DefaultIM=mozc
-
-      [Groups/0/Items/0]
-      Name=keyboard-{{ japanese_input_keyboard_layout }}
-      Layout=
-
-      [Groups/0/Items/1]
-      Name=mozc
-      Layout=
-
-      [GroupOrder]
-      0=Default

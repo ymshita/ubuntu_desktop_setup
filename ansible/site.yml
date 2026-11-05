@@ -2,7 +2,7 @@
   hosts: local
   roles:
     - base
-    - desktop_kde
+    - desktop_gnome
     - third_party_apps
     - devtools
     - nvm
