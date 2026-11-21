@@ -21,3 +21,6 @@ desktop_gnome_settings:
   - schema: org.gnome.desktop.wm.keybindings
     key: switch-to-workspace-right
     value: "['<Super>Right', '<Super>Page_Down', '<Super>KP_Next', '<Super><Alt>Right', '<Control><Alt>Right']"
+  - schema: org.gnome.settings-daemon.plugins.media-keys
+    key: suspend
+    value: "['<Control><Super>q']"

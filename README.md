@@ -69,6 +69,7 @@ sudo ansible-playbook ansible/site.yml
   - GNOME
   - Super 単押しの Activities は無効化
   - Super+←/→ はワークスペース移動（Tiling Assistant は無効化）
+  - Ctrl+Super+Q でサスペンド
 - 開発ツール・日常利用ツール
   - Docker
   - Chrome
